@@ -7,9 +7,11 @@ class VueSSRPlugin {
     compiler.plugin('emit', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
 
-      let entry = 'main'
-      if (!stats.assetsByChunkName.main) {
-        entry = Object.keys(stats.assetsByChunkName)[0]
+      let entry = this.options.entry || 'main'
+      if (!stats.assetsByChunkName[entry]) {
+        throw new Error(
+          `Entry "${entry}" not found. Did you specify the correct entry option?`
+        )
       }
 
       const bundle = {
