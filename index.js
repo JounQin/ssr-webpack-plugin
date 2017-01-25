@@ -7,15 +7,21 @@ class VueSSRPlugin {
     compiler.plugin('emit', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
 
-      let entry = this.options.entry || 'main'
-      if (!stats.assetsByChunkName[entry]) {
+      const entryName = this.options.entry || 'main'
+      let entry = stats.assetsByChunkName[entryName]
+
+      if (Array.isArray(entry)) {
+        entry = entry.filter(file => file.match(/\.js$/))[0]
+      }
+
+      if (!entry || typeof entry !== 'string') {
         throw new Error(
-          `Entry "${entry}" not found. Did you specify the correct entry option?`
+          `Entry "${entryName}" not found. Did you specify the correct entry option?`
         )
       }
 
       const bundle = {
-        entry: stats.assetsByChunkName[entry],
+        entry,
         files: {},
         maps: {}
       }
