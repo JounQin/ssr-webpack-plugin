@@ -18,6 +18,11 @@ const VueSSRPlugin = require('vue-ssr-webpack-plugin')
 
 module.exports = {
   target: 'node',
+  output: {
+    path: '...',
+    filename: '...',
+    libraryTarget: 'commonjs2'
+  },
   // ...
   plugins: [
     new VueSSRPlugin()
