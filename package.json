@@ -25,5 +25,8 @@
   "homepage": "https://github.com/vuejs/vue-ssr-webpack-plugin#readme",
   "devDependencies": {
     "buble": "^0.15.2"
+  },
+  "dependencies": {
+    "chalk": "^1.1.3"
   }
 }

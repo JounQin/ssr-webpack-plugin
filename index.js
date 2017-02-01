@@ -1,9 +1,34 @@
+const chalk = require('chalk')
+
+const warn = msg => console.error(chalk.red(`[vue-ssr-webpack-plugin] ${msg}\n`))
+const tip = msg => console.log(chalk.yellow(`[vue-ssr-webpack-plugin] ${msg}\n`))
+
 class VueSSRPlugin {
   constructor (options = {}) {
     this.options = options
   }
 
   apply (compiler) {
+    if (compiler.options.target !== 'node') {
+      warn(
+        'webpack config `target` should be "node".'
+      )
+    }
+
+    if (compiler.options.output && compiler.options.output.libraryTarget !== 'commonjs2') {
+      warn(
+        'webpack config `output.libraryTarget` should be "commonjs2".'
+      )
+    }
+
+    if (!compiler.options.externals) {
+      tip(
+        'It is recommended to externalize dependencies for better ssr performance.\n' +
+        `See ${chalk.gray('https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#externals')} ` +
+        'for more details.'
+      )
+    }
+
     compiler.plugin('emit', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
 
