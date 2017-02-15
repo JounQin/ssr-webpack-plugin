@@ -38,6 +38,13 @@ new VueSSRPlugin({
 })
 ```
 
+Using the generated bundle is straightforward:
+
+``` js
+const renderer = require('vue-server-renderer')
+  .createBundleRenderer('/path/to/my-bundle.json') // can also pass the parsed object
+```
+
 If you have more than one named entries in your Webpack config (although you probably don't need to do this when building server bundles), you can specify which entry should be used for the SSR bundle using the `entry` option:
 
 ``` js
