@@ -1,6 +1,6 @@
-# vue-ssr-webpack-plugin
+# ssr-webpack-plugin
 
-A Webpack plugin for generating a server-rendering bundle that can be used with Vue 2.x's [bundleRenderer](https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#why-use-bundlerenderer). **This plugin requires `vue-server-renderer@^2.2.0`**.
+A Webpack plugin for generating a server-rendering bundle that can be used with Vue 2.x's [bundleRenderer](https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#why-use-bundlerenderer). **This plugin requires `vue-server-renderer@^2.2.0`** in vue project or `run-in-vm` in react project.
 
 ### Why?
 
@@ -9,12 +9,12 @@ When you use Webpack's on-demand code-splitting feature (via `require.ensure` or
 ### Usage
 
 ``` bash
-npm install vue-ssr-webpack-plugin --save-dev
+npm install ssr-webpack-plugin --save-dev
 ```
 
 ``` js
 // in your webpack server bundle config
-const VueSSRPlugin = require('vue-ssr-webpack-plugin')
+const SSRPlugin = require('ssr-webpack-plugin')
 
 module.exports = {
   target: 'node',
@@ -25,15 +25,15 @@ module.exports = {
   },
   // ...
   plugins: [
-    new VueSSRPlugin()
+    new SSRPlugin()
   ]
 }
 ```
 
-By default, the resulting bundle JSON will be generated as `vue-ssr-bundle.json` in your Webpack output directory. You can customize the filename by passing an option to the plugin:
+By default, the resulting bundle JSON will be generated as `ssr-bundle.json` in your Webpack output directory. You can customize the filename by passing an option to the plugin:
 
 ``` js
-new VueSSRPlugin({
+new SSRPlugin({
   filename: 'my-bundle.json'
 })
 ```
@@ -41,8 +41,13 @@ new VueSSRPlugin({
 Using the generated bundle is straightforward:
 
 ``` js
+// vue project
 const renderer = require('vue-server-renderer')
   .createBundleRenderer('/path/to/my-bundle.json') // can also pass the parsed object
+  
+// react project
+const context = {}
+require('run-in-vm')(require('/path/to/my-bundle.json'), context)
 ```
 
 If you have more than one named entries in your Webpack config (although you probably don't need to do this when building server bundles), you can specify which entry should be used for the SSR bundle using the `entry` option:
@@ -54,7 +59,7 @@ module.exports = {
     app: '...'
   },
   plugins: [
-    new VueSSRPlugin({
+    new SSRPlugin({
       entry: 'app' // <- use "app" chunk as SSR bundle entry
     })
   ]

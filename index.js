@@ -3,7 +3,7 @@ const chalk = require('chalk')
 const warn = msg => console.error(chalk.red(`[ssr-webpack-plugin] ${msg}\n`))
 const tip = msg => console.log(chalk.yellow(`[ssr-webpack-plugin] ${msg}\n`))
 
-class VueSSRPlugin {
+class SSRPlugin {
   constructor (options = {}) {
     this.options = options
   }
@@ -75,4 +75,4 @@ class VueSSRPlugin {
   }
 }
 
-module.exports = VueSSRPlugin
+module.exports = SSRPlugin
