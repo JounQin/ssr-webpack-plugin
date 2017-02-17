@@ -1,7 +1,7 @@
 {
-  "name": "vue-ssr-webpack-plugin",
-  "version": "1.0.2",
-  "description": "webpack plugin for generating a bundle manifest to use with Vue 2.x bundleRenderer",
+  "name": "ssr-webpack-plugin",
+  "version": "0.0.1",
+  "description": "webpack plugin for generating a bundle manifest to use with Vue 2.x bundleRenderer or react-ssr run-in-vm",
   "main": "index.es5.js",
   "scripts": {
     "build": "buble index.js > index.es5.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuejs/vue-ssr-webpack-plugin.git"
+    "url": "git+https://github.com/JounQin/ssr-webpack-plugin.git"
   },
   "keywords": [
     "vue",
@@ -17,12 +17,12 @@
     "webpack",
     "plugin"
   ],
-  "author": "Evan You",
+  "author": "JounQin",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vuejs/vue-ssr-webpack-plugin/issues"
+    "url": "https://github.com/JounQin/ssr-webpack-plugin/issues"
   },
-  "homepage": "https://github.com/vuejs/vue-ssr-webpack-plugin#readme",
+  "homepage": "https://github.com/JounQin/ssr-webpack-plugin#readme",
   "devDependencies": {
     "buble": "^0.15.2"
   },

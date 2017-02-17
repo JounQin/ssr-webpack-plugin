@@ -1,7 +1,7 @@
 const chalk = require('chalk')
 
-const warn = msg => console.error(chalk.red(`[vue-ssr-webpack-plugin] ${msg}\n`))
-const tip = msg => console.log(chalk.yellow(`[vue-ssr-webpack-plugin] ${msg}\n`))
+const warn = msg => console.error(chalk.red(`[ssr-webpack-plugin] ${msg}\n`))
+const tip = msg => console.log(chalk.yellow(`[ssr-webpack-plugin] ${msg}\n`))
 
 class VueSSRPlugin {
   constructor (options = {}) {
@@ -63,7 +63,7 @@ class VueSSRPlugin {
       })
 
       const json = JSON.stringify(bundle, null, 2)
-      const filename = this.options.filename || 'vue-ssr-bundle.json'
+      const filename = this.options.filename || 'ssr-bundle.json'
 
       compilation.assets[filename] = {
         source: () => json,
