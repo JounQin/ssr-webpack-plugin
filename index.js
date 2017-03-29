@@ -46,7 +46,6 @@ class VueSSRPlugin {
       }
 
       const bundle = {
-        basedir: compiler.options.output && compiler.options.output.path,
         entry,
         files: {},
         maps: {}
