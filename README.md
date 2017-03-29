@@ -60,3 +60,7 @@ module.exports = {
   ]
 }
 ```
+
+1. Optionally provide client plugin, which generates `vue-ssr-client-manifest.json`. Pass this as the `manifest` option to Vue's bundle renderer.
+
+2. Bundle renderer simply passes the manifest to vue-ssr-html-stream
