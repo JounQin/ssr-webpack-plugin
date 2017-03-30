@@ -14,10 +14,11 @@ npm install vue-ssr-webpack-plugin --save-dev
 
 ``` js
 // in your webpack server bundle config
-const VueSSRPlugin = require('vue-ssr-webpack-plugin')
+const { VueSSRServerPlugin } = require('vue-ssr-webpack-plugin')
 
 module.exports = {
   target: 'node',
+  entry: '...',
   output: {
     path: '...',
     filename: '...',
@@ -25,7 +26,7 @@ module.exports = {
   },
   // ...
   plugins: [
-    new VueSSRPlugin()
+    new VueSSRServerPlugin()
   ]
 }
 ```
@@ -41,26 +42,73 @@ new VueSSRPlugin({
 Using the generated bundle is straightforward:
 
 ``` js
-const renderer = require('vue-server-renderer')
-  .createBundleRenderer('/path/to/my-bundle.json') // can also pass the parsed object
+const { createBundleRenderer } = require('vue-server-renderer')
+const bundle = require('/path/to/my-bundle.json')
+const renderer = createBundleRenderer(bundle) // can also directly pass the absolute path string.
 ```
 
-If you have more than one named entries in your Webpack config (although you probably don't need to do this when building server bundles), you can specify which entry should be used for the SSR bundle using the `entry` option:
+**Note:** your server bundle should have single entry, so avoid using `CommonsChunkPlugin` in your server bundle config.
+
+### Client Manifest
+
+> Requires vue-server-renderer@^2.3 and vue-ssr-webpack-plugin@^2.0
+
+`vue-server-renderer` 2.2 supports rendering the entire HTML page with the `template` option. 2.3 introduces another new feature, which allows us to pass a manifest of our client-side build to the `bundleRenderer`. This provides the renderer with information of both the server AND client builds, so it can automatically infer and inject preload/prefetch directives and script tags into the rendered HTML. This is particularly useful when rendering a bundle that leverages webpack's on-demand code splitting features: we can ensure the right chunks are preloaded/prefetched, and also directly embed `<script>` tags for needed async chunks in the HTML to avoid waterfall requests on the client, thus improving TTI (time-to-interactive).
+
+To generate a client manifest, you need to add the client plugin to your client webpack config. In addition, make sure to use `CommonsChunkPlugin` to split the webpack runtime into its own entry chunk, so that async chunks can be injected **after** the runtime and **before** your main app code.
 
 ``` js
+// in your webpack client bundle config
+const webpack = require('webpack')
+const { VueSSRClientPlugin } = require('vue-ssr-webpack-plugin')
+
 module.exports = {
-  entry: {
-    vendor: [...],
-    app: '...'
-  },
+  // ...
   plugins: [
-    new VueSSRPlugin({
-      entry: 'app' // <- use "app" chunk as SSR bundle entry
-    })
+    // this splits the webpack runtime into a leading chunk
+    // so that async chunks can be injected right after it.
+    // this also enables better caching for your app/vendor code.
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'manifest',
+      minChunks: Infinity
+    }),
+    // this will generate the client manifest JSON file.
+    new VueSSRClientPlugin()
   ]
 }
 ```
 
-1. Optionally provide client plugin, which generates `vue-ssr-client-manifest.json`. Pass this as the `manifest` option to Vue's bundle renderer.
+This will generate an additional `vue-ssr-client-manifest.json` file in your build output. Simply require and pass it to the `bundleRenderer`:
 
-2. Bundle renderer simply passes the manifest to vue-ssr-html-stream
+``` js
+const { createBundleRenderer } = require('vue-server-renderer')
+
+const template = require('fs').readFileSync('/path/to/template.html', 'utf-8')
+const serverBundle = require('/path/to/vue-ssr-bundle.json')
+const clientManifest = require('/path/to/vue-ssr-client-manifest.json')
+
+const renderer = createBundleRenderer(serverBundle, {
+  template,
+  clientManifest
+})
+```
+
+With this setup, your server-rendered HTML for a build with code-splitting will look something like this:
+
+``` html
+<html><head>
+  <!-- used chunks should have preload -->
+  <link rel="preload" href="/manifest.js" as="script">
+  <link rel="preload" href="/main.js" as="script">
+  <link rel="preload" href="/0.js" as="script">
+  <!-- unused chunks should have prefetch -->
+  <link rel="prefetch" href="/1.js" as="script">
+</head><body>
+  <div data-server-rendered="true"><div>async</div></div>
+  <!-- manifest chunk should be first -->
+  <script src="/manifest.js"></script>
+  <!-- async chunks should be before main chunk -->
+  <script src="/0.js"></script>
+  <script src="/main.js"></script>
+</body></html>`
+```
