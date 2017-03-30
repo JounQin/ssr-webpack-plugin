@@ -1,6 +1,6 @@
 {
   "name": "vue-ssr-webpack-plugin",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "webpack plugin for generating a bundle manifest to use with Vue 2.x bundleRenderer",
   "main": "lib/index.js",
   "files": [
