@@ -48,11 +48,11 @@ module.exports = class VueSSRServerPlugin {
               }
             })
           })
-          delete compilation.assets[asset.name]
         } else if (asset.name.match(/\.js\.map$/)) {
           bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
-          delete compilation.assets[asset.name]
         }
+        // do not emit anything else for server
+        delete compilation.assets[asset.name]
       })
 
       const json = JSON.stringify(bundle, null, 2)
