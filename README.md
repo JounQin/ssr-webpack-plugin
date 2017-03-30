@@ -55,7 +55,11 @@ const renderer = createBundleRenderer(bundle) // can also directly pass the abso
 
 `vue-server-renderer` 2.2 supports rendering the entire HTML page with the `template` option. 2.3 introduces another new feature, which allows us to pass a manifest of our client-side build to the `bundleRenderer`. This provides the renderer with information of both the server AND client builds, so it can automatically infer and inject preload/prefetch directives and script tags into the rendered HTML. This is particularly useful when rendering a bundle that leverages webpack's on-demand code splitting features: we can ensure the right chunks are preloaded/prefetched, and also directly embed `<script>` tags for needed async chunks in the HTML to avoid waterfall requests on the client, thus improving TTI (time-to-interactive).
 
-To generate a client manifest, you need to add the client plugin to your client webpack config. In addition, make sure to use `CommonsChunkPlugin` to split the webpack runtime into its own entry chunk, so that async chunks can be injected **after** the runtime and **before** your main app code.
+To generate a client manifest, you need to add the client plugin to your client webpack config. In addition:
+
+- Make sure to use `CommonsChunkPlugin` to split the webpack runtime into its own entry chunk, so that async chunks can be injected **after** the runtime and **before** your main app code.
+
+- Since in this case `vue-server-renderer` will be dynamically injecting the asset links, you don't need to use `html-webpack-plugin`. However, the setup only handles JavaScript. If you want to use `html-webpack-plugin` for embedding other types of assets (e.g fonts), you can still use it - just make sure to configure it with `inject: false` so that it doesn't duplicate-inject the scripts.
 
 ``` js
 // in your webpack client bundle config
@@ -97,11 +101,11 @@ With this setup, your server-rendered HTML for a build with code-splitting will 
 
 ``` html
 <html><head>
-  <!-- used chunks should have preload -->
+  <!-- chunks used for this render should have preload -->
   <link rel="preload" href="/manifest.js" as="script">
   <link rel="preload" href="/main.js" as="script">
   <link rel="preload" href="/0.js" as="script">
-  <!-- unused chunks should have prefetch -->
+  <!-- unused async chunks should have prefetch -->
   <link rel="prefetch" href="/1.js" as="script">
 </head><body>
   <div data-server-rendered="true"><div>async</div></div>
