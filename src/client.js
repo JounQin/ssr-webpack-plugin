@@ -2,7 +2,9 @@ const hash = require('hash-sum')
 
 module.exports = class VueSSRClientPlugin {
   constructor (options = {}) {
-    this.options = options
+    this.options = Object.assign({
+      filename: 'vue-ssr-client-manifest.json',
+    }, options)
   }
 
   apply (compiler) {
@@ -59,7 +61,7 @@ module.exports = class VueSSRClientPlugin {
       })
 
       const json = JSON.stringify(manifest, null, 2)
-      compilation.assets['vue-ssr-client-manifest.json'] = {
+      compilation.assets[this.options.filename] = {
         source: () => json,
         size: () => json.length
       }
