@@ -1,5 +1,5 @@
 const hash = require('hash-sum')
-const { validate, warn } = require('./validate')
+const { validate, warn, isJS } = require('./util')
 
 module.exports = class VueSSRServerPlugin {
   constructor (options = {}) {
@@ -12,9 +12,7 @@ module.exports = class VueSSRServerPlugin {
     compiler.plugin('emit', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
       const entryName = Object.keys(stats.entrypoints)[0]
-      const entryAssets = stats.entrypoints[entryName].assets.filter(file => {
-        return /\.js$/.test(file)
-      })
+      const entryAssets = stats.entrypoints[entryName].assets.filter(isJS)
 
       if (entryAssets.length > 1) {
         throw new Error(
@@ -48,7 +46,7 @@ module.exports = class VueSSRServerPlugin {
               }
             })
           })
-        } else if (asset.name.match(/\.js\.map$/)) {
+        } else if (asset.name.match(/\.map$/)) {
           bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
         }
         // do not emit anything else for server

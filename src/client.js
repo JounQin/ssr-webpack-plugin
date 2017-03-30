@@ -1,4 +1,5 @@
 const hash = require('hash-sum')
+const { isJS } = require('./util')
 
 module.exports = class VueSSRClientPlugin {
   constructor (options = {}) {
@@ -13,21 +14,21 @@ module.exports = class VueSSRClientPlugin {
 
       const allFiles = stats.assets
         .map(a => a.name)
-        .filter(file => /\.js$/.test(file))
 
-      const initialFiles = Object.keys(stats.entrypoints)
+      const initialScripts = Object.keys(stats.entrypoints)
         .map(name => stats.entrypoints[name].assets)
         .reduce((assets, all) => all.concat(assets), [])
-        .filter(file => /\.js$/.test(file))
+        .filter(isJS)
 
-      const asyncFiles = allFiles
-        .filter(file => initialFiles.indexOf(file) < 0)
+      const asyncScripts = allFiles
+        .filter(isJS)
+        .filter(file => initialScripts.indexOf(file) < 0)
 
       const manifest = {
         publicPath: stats.publicPath,
         all: allFiles,
-        initial: initialFiles,
-        async: asyncFiles,
+        initial: initialScripts,
+        async: asyncScripts,
         modules: { /* [identifier: string]: Array<index: number> */ }
       }
 
@@ -37,6 +38,12 @@ module.exports = class VueSSRClientPlugin {
           const cid = m.chunks[0]
           const chunk = stats.chunks.find(c => c.id === cid)
           manifest.modules[hash(m.identifier)] = chunk.files.map(file => {
+            return manifest.all.indexOf(file)
+          })
+        }
+        // asset modules, e.g. images, fonts
+        if (m.assets.length) {
+          manifest.modules[hash(m.identifier)] = m.assets.map(file => {
             return manifest.all.indexOf(file)
           })
         }

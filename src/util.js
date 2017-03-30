@@ -20,3 +20,5 @@ exports.validate = compiler => {
     )
   }
 }
+
+exports.isJS = file => /\.js($|\?)/.test(file)
