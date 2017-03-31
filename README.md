@@ -117,7 +117,7 @@ With this setup, your server-rendered HTML for a build with code-splitting will 
 </body></html>`
 ```
 
-In addition, the renderer also adds preload links for fonts referenced in your webpack build (via `file-loader`). However, it doesn't add preload links for images by default because this may result in excessive bandwidth usage upfront. You can apply fine-grained control on what to add preload links for using the `shouldPreload` option:
+Note the renderer by default only generates preload links for JavaScript assets. You can apply fine-grained control on what to add preload links for using the `shouldPreload` option:
 
 ``` js
 const renderer = createBundleRenderer(serverBundle, {
@@ -126,8 +126,12 @@ const renderer = createBundleRenderer(serverBundle, {
   shouldPreload: (file, type) => {
     // type is inferred based on the file extension.
     // https://fetch.spec.whatwg.org/#concept-request-destination
-    if (type === 'script' || type === 'font') {
+    if (type === 'script') {
       return true
+    }
+    if (type === 'font') {
+      // only preload woff2 fonts
+      return /\.woff2$/.test(file)
     }
     if (type === 'image') {
       // only preload important images
