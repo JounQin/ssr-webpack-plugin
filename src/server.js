@@ -31,21 +31,12 @@ module.exports = class VueSSRServerPlugin {
       const bundle = {
         entry,
         files: {},
-        maps: {},
-        modules: {} // maps each file to a list of hashed module identifiers
+        maps: {}
       }
 
       stats.assets.forEach(asset => {
         if (asset.name.match(/\.js$/)) {
           bundle.files[asset.name] = compilation.assets[asset.name].source()
-          const modules = bundle.modules[asset.name] = []
-          asset.chunks.forEach(id => {
-            stats.modules.forEach(m => {
-              if (m.chunks.some(_id => id === _id)) {
-                modules.push(hash(m.identifier))
-              }
-            })
-          })
         } else if (asset.name.match(/\.map$/)) {
           bundle.maps[asset.name.replace(/\.map$/, '')] = JSON.parse(compilation.assets[asset.name].source())
         }
