@@ -1,7 +1,7 @@
 const { red, yellow, gray } = require('chalk')
 
-const warn = exports.warn = msg => console.error(red(`[vue-ssr-webpack-plugin] ${msg}\n`))
-const tip = exports.tip = msg => console.log(yellow(`[vue-ssr-webpack-plugin] ${msg}\n`))
+const warn = exports.warn = msg => console.error(red(`[ssr-webpack-plugin] ${msg}\n`))
+const tip = exports.tip = msg => console.log(yellow(`[ssr-webpack-plugin] ${msg}\n`))
 
 exports.validate = compiler => {
   if (compiler.options.target !== 'node') {

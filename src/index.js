@@ -1,3 +1,3 @@
 module.exports = require('./server')
-module.exports.VueSSRServerPlugin = require('./server')
-module.exports.VueSSRClientPlugin = require('./client')
+module.exports.SSRServerPlugin = require('./server')
+module.exports.SSRClientPlugin = require('./client')

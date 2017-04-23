@@ -5,10 +5,10 @@ const { isJS } = require('./util')
 //   require('fs').writeFileSync(__dirname + '/' + file, JSON.stringify(obj, null, 2))
 // }
 
-module.exports = class VueSSRClientPlugin {
+module.exports = class SSRClientPlugin {
   constructor (options = {}) {
     this.options = Object.assign({
-      filename: 'vue-ssr-client-manifest.json',
+      filename: 'ssr-client-manifest.json',
     }, options)
   }
 

@@ -1,7 +1,7 @@
 const hash = require('hash-sum')
 const { validate, warn, isJS } = require('./util')
 
-module.exports = class VueSSRServerPlugin {
+module.exports = class SSRServerPlugin {
   constructor (options = {}) {
     this.options = options
   }
@@ -45,7 +45,7 @@ module.exports = class VueSSRServerPlugin {
       })
 
       const json = JSON.stringify(bundle, null, 2)
-      const filename = this.options.filename || 'vue-ssr-bundle.json'
+      const filename = this.options.filename || 'ssr-bundle.json'
 
       compilation.assets[filename] = {
         source: () => json,
@@ -56,5 +56,3 @@ module.exports = class VueSSRServerPlugin {
     })
   }
 }
-
-

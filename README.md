@@ -1,6 +1,6 @@
 # ssr-webpack-plugin
 
-A Webpack plugin for generating a server-rendering bundle that can be used with Vue 2.x's [bundleRenderer](https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#why-use-bundlerenderer). **This plugin requires `vue-server-renderer@^2.2.0`**.
+A Webpack plugin for generating a server-rendering bundle that can be used with Vue 2.x's [bundleRenderer](https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#why-use-bundlerenderer). **This plugin requires `vue-server-renderer@^2.2.0` in vue project or `run-in-vm` in react project**.
 
 ### Why?
 
@@ -34,7 +34,7 @@ module.exports = {
 By default, the resulting bundle JSON will be generated as `ssr-bundle.json` in your Webpack output directory. You can customize the filename by passing an option to the plugin:
 
 ``` js
-new VueSSRPlugin({
+new SSRPlugin({
   filename: 'my-bundle.json'
 })
 ```
@@ -42,16 +42,21 @@ new VueSSRPlugin({
 Using the generated bundle is straightforward:
 
 ``` js
+// vue project
 const { createBundleRenderer } = require('vue-server-renderer')
 const bundle = require('/path/to/my-bundle.json')
 const renderer = createBundleRenderer(bundle) // can also directly pass the absolute path string.
+
+// react project
+const context = {}
+require('run-in-vm')(require('/path/to/my-bundle.json'), context)
 ```
 
 **Note:** your server bundle should have single entry, so avoid using `CommonsChunkPlugin` in your server bundle config.
 
 ### Client Manifest
 
-> Requires vue-server-renderer@^2.3 and vue-ssr-webpack-plugin@^2.0
+> Requires vue-server-renderer@^2.3 and ssr-webpack-plugin@^1.0
 
 `vue-server-renderer` 2.2 supports rendering the entire HTML page with the `template` option. 2.3 introduces another new feature, which allows us to pass a manifest of our client-side build to the `bundleRenderer`. This provides the renderer with information of both the server AND client builds, so it can automatically infer and inject preload/prefetch directives and script tags into the rendered HTML. This is particularly useful when rendering a bundle that leverages webpack's on-demand code splitting features: we can ensure the right chunks are preloaded/prefetched, and also directly embed `<script>` tags for needed async chunks in the HTML to avoid waterfall requests on the client, thus improving TTI (time-to-interactive).
 
