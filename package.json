@@ -1,10 +1,13 @@
 {
   "name": "ssr-webpack-plugin",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "webpack plugin for generating a bundle manifest to use with Vue 2.x bundleRenderer or react-ssr run-in-vm",
-  "main": "index.es5.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
-    "build": "buble index.js > index.es5.js",
+    "build": "buble src -o lib",
     "prepublish": "npm run build"
   },
   "repository": {
@@ -28,6 +31,7 @@
     "buble": "^0.15.2"
   },
   "dependencies": {
-    "chalk": "^1.1.3"
+    "chalk": "^1.1.3",
+    "hash-sum": "^1.0.2"
   }
 }
