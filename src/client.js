@@ -1,39 +1,41 @@
-const hash = require('hash-sum')
-const { isJS } = require('./util')
+import hash from 'hash-sum'
+import uniq from 'lodash.uniq'
 
-// const debug = (file, obj) => {
-//   require('fs').writeFileSync(__dirname + '/' + file, JSON.stringify(obj, null, 2))
-// }
+import { isJS } from './util'
 
-module.exports = class SSRClientPlugin {
-  constructor (options = {}) {
-    this.options = Object.assign({
+export default class SSRClientPlugin {
+  constructor(options = {}) {
+    this.options = {
       filename: 'ssr-client-manifest.json',
-    }, options)
+      ...options,
+    }
   }
 
-  apply (compiler) {
+  apply(compiler) {
     compiler.plugin('emit', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
 
-      const allFiles = stats.assets
-        .map(a => a.name)
+      const allFiles = uniq(stats.assets.map(a => a.name))
 
-      const initialScripts = Object.keys(stats.entrypoints)
-        .map(name => stats.entrypoints[name].assets)
-        .reduce((assets, all) => all.concat(assets), [])
-        .filter(isJS)
+      const initialFiles = uniq(
+        Object.keys(stats.entrypoints)
+          .map(name => stats.entrypoints[name].assets)
+          .reduce((assets, all) => all.concat(assets), [])
+          .filter(isJS),
+      )
 
-      const asyncScripts = allFiles
+      const asyncFiles = allFiles
         .filter(isJS)
-        .filter(file => initialScripts.indexOf(file) < 0)
+        .filter(file => initialFiles.indexOf(file) < 0)
 
       const manifest = {
         publicPath: stats.publicPath,
         all: allFiles,
-        initial: initialScripts,
-        async: asyncScripts,
-        modules: { /* [identifier: string]: Array<index: number> */ }
+        initial: initialFiles,
+        async: asyncFiles,
+        modules: {
+          /* [identifier: string]: Array<index: number> */
+        },
       }
 
       const assetModules = stats.modules.filter(m => m.assets.length)
@@ -43,7 +45,12 @@ module.exports = class SSRClientPlugin {
         if (m.chunks.length === 1) {
           const cid = m.chunks[0]
           const chunk = stats.chunks.find(c => c.id === cid)
-          const files = manifest.modules[hash(m.identifier)] = chunk.files.map(fileToIndex)
+          if (!chunk || !chunk.files) {
+            return
+          }
+          const files = (manifest.modules[hash(m.identifier)] = chunk.files.map(
+            fileToIndex,
+          ))
           // find all asset modules associated with the same chunk
           assetModules.forEach(m => {
             if (m.chunks.some(id => id === cid)) {
@@ -53,13 +60,16 @@ module.exports = class SSRClientPlugin {
         }
       })
 
+      // const debug = (file, obj) => {
+      //   require('fs').writeFileSync(__dirname + '/' + file, JSON.stringify(obj, null, 2))
+      // }
       // debug('stats.json', stats)
       // debug('client-manifest.json', manifest)
 
       const json = JSON.stringify(manifest, null, 2)
       compilation.assets[this.options.filename] = {
         source: () => json,
-        size: () => json.length
+        size: () => json.length,
       }
       cb()
     })

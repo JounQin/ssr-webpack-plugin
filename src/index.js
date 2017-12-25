@@ -1,3 +1,2 @@
-module.exports = require('./server')
-module.exports.SSRServerPlugin = require('./server')
-module.exports.SSRClientPlugin = require('./client')
+export { default as SSRClientPlugin } from './client'
+export { default as SSRServerPlugin } from './server'

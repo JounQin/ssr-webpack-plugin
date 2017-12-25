@@ -1,24 +1,29 @@
-const { red, yellow, gray } = require('chalk')
+import chalk from 'chalk'
 
-const warn = exports.warn = msg => console.error(red(`[ssr-webpack-plugin] ${msg}\n`))
-const tip = exports.tip = msg => console.log(yellow(`[ssr-webpack-plugin] ${msg}\n`))
+const { red, yellow } = chalk
 
-exports.validate = compiler => {
+const prefix = '[ssr-webpack-plugin]'
+const warn = msg => console.error(red(`${prefix} ${msg}\n`))
+const tip = msg => console.log(yellow(`${prefix} ${msg}\n`))
+
+export const validate = compiler => {
   if (compiler.options.target !== 'node') {
     warn('webpack config `target` should be "node".')
   }
 
-  if (compiler.options.output && compiler.options.output.libraryTarget !== 'commonjs2') {
+  if (
+    compiler.options.output &&
+    compiler.options.output.libraryTarget !== 'commonjs2'
+  ) {
     warn('webpack config `output.libraryTarget` should be "commonjs2".')
   }
 
   if (!compiler.options.externals) {
     tip(
-      'It is recommended to externalize dependencies for better ssr performance.\n' +
-      `See ${gray('https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#externals')} ` +
-      'for more details.'
+      'It is recommended to externalize dependencies in the server build for ' +
+        'better build performance.',
     )
   }
 }
 
-exports.isJS = file => /\.js($|\?)/.test(file)
+export const isJS = file => /\.js(\?[^.]+)?$/.test(file)
