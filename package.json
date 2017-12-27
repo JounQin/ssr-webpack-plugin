@@ -1,6 +1,6 @@
 {
   "name": "ssr-webpack-plugin",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "webpack plugin for generating a bundle manifest to use with Vue 2.x bundleRenderer or react-ssr run-in-vm",
   "main": "lib/index.js",
   "files": ["lib"],
@@ -21,7 +21,8 @@
   "homepage": "https://github.com/JounQin/ssr-webpack-plugin#readme",
   "dependencies": {
     "chalk": "^2.3.0",
-    "hash-sum": "^1.0.2"
+    "hash-sum": "^1.0.2",
+    "lodash.uniq": "^4.5.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.35",
