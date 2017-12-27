@@ -1,2 +1,7 @@
+import SSRServerPlugin from './server'
+
 export { default as SSRClientPlugin } from './client'
-export { default as SSRServerPlugin } from './server'
+
+export { SSRServerPlugin }
+
+export default SSRServerPlugin
