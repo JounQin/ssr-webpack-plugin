@@ -1,4 +1,4 @@
-import { validate, isJS } from './util'
+import { validate, isJS, onEmit } from './util'
 
 export default class SSRServerPlugin {
   constructor(options = {}) {
@@ -11,13 +11,13 @@ export default class SSRServerPlugin {
   apply(compiler) {
     validate(compiler)
 
-    compiler.plugin('emit', (compilation, cb) => {
+    onEmit(compiler, 'ssr-server-plugin', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
       const entryName = Object.keys(stats.entrypoints)[0]
       const entryInfo = stats.entrypoints[entryName]
 
       if (!entryInfo) {
-        // vuejs/vie#5553
+        // vuejs/vue#5553
         return cb()
       }
 

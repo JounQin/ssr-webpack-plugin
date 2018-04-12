@@ -1,7 +1,7 @@
 import hash from 'hash-sum'
 import uniq from 'lodash.uniq'
 
-import { isJS } from './util'
+import { isJS, isCSS, onEmit } from './util'
 
 export default class SSRClientPlugin {
   constructor(options = {}) {
@@ -12,7 +12,7 @@ export default class SSRClientPlugin {
   }
 
   apply(compiler) {
-    compiler.plugin('emit', (compilation, cb) => {
+    onEmit(compiler, 'ssr-client-plugin', (compilation, cb) => {
       const stats = compilation.getStats().toJson()
 
       const allFiles = uniq(stats.assets.map(a => a.name))
@@ -21,11 +21,11 @@ export default class SSRClientPlugin {
         Object.keys(stats.entrypoints)
           .map(name => stats.entrypoints[name].assets)
           .reduce((assets, all) => all.concat(assets), [])
-          .filter(isJS),
+          .filter(file => isJS(file) || isCSS(file)),
       )
 
       const asyncFiles = allFiles
-        .filter(isJS)
+        .filter(file => isJS(file) || isCSS(file))
         .filter(file => initialFiles.indexOf(file) < 0)
 
       const manifest = {
@@ -48,7 +48,8 @@ export default class SSRClientPlugin {
           if (!chunk || !chunk.files) {
             return
           }
-          const files = (manifest.modules[hash(m.identifier)] = chunk.files.map(
+          const id = m.identifier.replace(/\s\w+$/, '') // remove appended hash
+          const files = (manifest.modules[hash(id)] = chunk.files.map(
             fileToIndex,
           ))
           // find all asset modules associated with the same chunk

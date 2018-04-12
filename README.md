@@ -1,6 +1,6 @@
 # ssr-webpack-plugin
 
-A Webpack plugin for generating a server-rendering bundle that can be used with Vue 2.x's [bundleRenderer](https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#why-use-bundlerenderer). **This plugin requires `vue-server-renderer@^2.2.0` in vue project or `run-in-vm` in react project**.
+A Webpack plugin for generating a server-rendering bundle that can be used with Vue 2.x's [bundleRenderer](https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer#why-use-bundlerenderer). **This plugin requires `vue-server-renderer@^2.2.0` in vue project or [react-server-renderer](https://github.com/JounQin/react-server-renderer) in react project**.
 
 ### Why?
 
@@ -8,11 +8,11 @@ When you use Webpack's on-demand code-splitting feature (via `require.ensure` or
 
 ### Usage
 
-``` bash
+```bash
 npm install ssr-webpack-plugin --save-dev
 ```
 
-``` js
+```js
 // in your webpack server bundle config
 const { SSRServerPlugin } = require('ssr-webpack-plugin')
 
@@ -22,51 +22,45 @@ module.exports = {
   output: {
     path: '...',
     filename: '...',
-    libraryTarget: 'commonjs2'
+    libraryTarget: 'commonjs2',
   },
   // ...
-  plugins: [
-    new SSRServerPlugin()
-  ]
+  plugins: [new SSRServerPlugin()],
 }
 ```
 
 By default, the resulting bundle JSON will be generated as `ssr-bundle.json` in your Webpack output directory. You can customize the filename by passing an option to the plugin:
 
-``` js
+```js
 new SSRPlugin({
-  filename: 'my-bundle.json'
+  filename: 'my-bundle.json',
 })
 ```
 
 Using the generated bundle is straightforward:
 
-``` js
-// vue project
-const { createBundleRenderer } = require('vue-server-renderer')
+```js
+const { createBundleRenderer } = require('vue-server-renderer') // vue project
+const { createBundleRenderer } = require('react-server-renderer') // react project
 const bundle = require('/path/to/my-bundle.json')
 const renderer = createBundleRenderer(bundle) // can also directly pass the absolute path string.
-
-// react project
-const context = {}
-require('run-in-vm')(require('/path/to/my-bundle.json'), context)
 ```
 
 **Note:** your server bundle should have single entry, so avoid using `CommonsChunkPlugin` in your server bundle config.
 
 ### Client Manifest
 
-> Requires vue-server-renderer@^2.3 and ssr-webpack-plugin@^1.0
+> Requires vue-server-renderer@^2.3 or react-server-renderer and ssr-webpack-plugin@^1.0
 
 `vue-server-renderer` 2.2 supports rendering the entire HTML page with the `template` option. 2.3 introduces another new feature, which allows us to pass a manifest of our client-side build to the `bundleRenderer`. This provides the renderer with information of both the server AND client builds, so it can automatically infer and inject preload/prefetch directives and script tags into the rendered HTML. This is particularly useful when rendering a bundle that leverages webpack's on-demand code splitting features: we can ensure the right chunks are preloaded/prefetched, and also directly embed `<script>` tags for needed async chunks in the HTML to avoid waterfall requests on the client, thus improving TTI (time-to-interactive).
 
 To generate a client manifest, you need to add the client plugin to your client webpack config. In addition:
 
-- Make sure to use `CommonsChunkPlugin` to split the webpack runtime into its own entry chunk, so that async chunks can be injected **after** the runtime and **before** your main app code.
+* Make sure to use `CommonsChunkPlugin` to split the webpack runtime into its own entry chunk, so that async chunks can be injected **after** the runtime and **before** your main app code.
 
-- Since in this case `vue-server-renderer` will be dynamically injecting the asset links, you don't need to use `html-webpack-plugin`. However, the setup only handles JavaScript. If you want to use `html-webpack-plugin` for embedding other types of assets (e.g fonts), you can still use it - just make sure to configure it with `inject: false` so that it doesn't duplicate-inject the scripts.
+* Since in this case `vue/react-server-renderer` will be dynamically injecting the asset links, you don't need to use `html-webpack-plugin`. However, the setup only handles JavaScript. If you want to use `html-webpack-plugin` for embedding other types of assets (e.g fonts), you can still use it - just make sure to configure it with `inject: false` so that it doesn't duplicate-inject the scripts.
 
-``` js
+```js
 // in your webpack client bundle config
 const webpack = require('webpack')
 const { SSRClientPlugin } = require('ssr-webpack-plugin')
@@ -79,32 +73,32 @@ module.exports = {
     // this also enables better caching for your app/vendor code.
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest',
-      minChunks: Infinity
+      minChunks: Infinity,
     }),
     // this will generate the client manifest JSON file.
-    new SSRClientPlugin()
-  ]
+    new SSRClientPlugin(),
+  ],
 }
 ```
 
 This will generate an additional `ssr-client-manifest.json` file in your build output. Simply require and pass it to the `bundleRenderer`:
 
-``` js
+```js
 const { createBundleRenderer } = require('vue-server-renderer')
 
 const template = require('fs').readFileSync('/path/to/template.html', 'utf-8')
-const serverBundle = require('/path/to/vue-ssr-bundle.json')
-const clientManifest = require('/path/to/vue-ssr-client-manifest.json')
+const serverBundle = require('/path/to/ssr-bundle.json')
+const clientManifest = require('/path/to/ssr-client-manifest.json')
 
 const renderer = createBundleRenderer(serverBundle, {
   template,
-  clientManifest
+  clientManifest,
 })
 ```
 
 With this setup, your server-rendered HTML for a build with code-splitting will look something like this:
 
-``` html
+```html
 <html><head>
   <!-- chunks used for this render should have preload -->
   <link rel="preload" href="/manifest.js" as="script">
@@ -124,7 +118,7 @@ With this setup, your server-rendered HTML for a build with code-splitting will 
 
 Note the renderer by default only generates preload links for JavaScript assets. You can apply fine-grained control on what to add preload links for using the `shouldPreload` option:
 
-``` js
+```js
 const renderer = createBundleRenderer(serverBundle, {
   template,
   clientManifest,
@@ -142,6 +136,6 @@ const renderer = createBundleRenderer(serverBundle, {
       // only preload important images
       return file === 'hero.jpg'
     }
-  }
+  },
 })
 ```

@@ -1,11 +1,13 @@
 {
   "name": "ssr-webpack-plugin",
-  "version": "1.1.2",
-  "description": "webpack plugin for generating a bundle manifest to use with Vue 2.x bundleRenderer or react-ssr run-in-vm",
+  "version": "2.0.0",
+  "description": "webpack plugin for generating a bundle manifest to use with Vue 2.x bundleRenderer or react-server-renderer",
   "main": "lib/index.js",
   "files": ["lib"],
   "scripts": {
     "build": "babel src --presets=@babel/env,@babel/stage-0 -d lib",
+    "lint": "eslint . --max-warnings=10",
+    "precommit": "lint-staged",
     "prepublishOnly": "npm run build"
   },
   "repository": {
@@ -19,15 +21,44 @@
     "url": "https://github.com/JounQin/ssr-webpack-plugin/issues"
   },
   "homepage": "https://github.com/JounQin/ssr-webpack-plugin#readme",
+  "eslintConfig": {
+    "extends": "1stg",
+    "rules": {
+      "no-console": 0
+    }
+  },
+  "eslintIgnore": ["lib"],
+  "lint-staged": {
+    "*.js": ["eslint . --max-warnings=10 --fix", "git add"],
+    "*.md": ["prettier --write", "git add"]
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "overrides": [
+      {
+        "files": "*.json",
+        "options": {
+          "printWidth": 150
+        }
+      }
+    ]
+  },
   "dependencies": {
-    "chalk": "^2.3.0",
+    "chalk": "^2.3.2",
     "hash-sum": "^1.0.2",
     "lodash.uniq": "^4.5.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.0.0-beta.35",
-    "@babel/core": "^7.0.0-beta.35",
-    "@babel/preset-env": "^7.0.0-beta.35",
-    "@babel/preset-stage-0": "^7.0.0-beta.35"
+    "@babel/cli": "^7.0.0-beta.44",
+    "@babel/core": "^7.0.0-beta.44",
+    "@babel/preset-env": "^7.0.0-beta.44",
+    "@babel/preset-stage-0": "^7.0.0-beta.44",
+    "eslint": "^4.19.1",
+    "eslint-config-1stg": "^2.1.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.0.4",
+    "prettier": "^1.12.0"
   }
 }
