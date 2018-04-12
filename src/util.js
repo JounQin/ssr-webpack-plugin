@@ -36,4 +36,6 @@ export const onEmit = (compiler, name, hook) => {
   }
 }
 
-export { isJS, isCSS } from '../util'
+export const isJS = file => /\.js(\?[^.]+)?$/.test(file)
+
+export const isCSS = file => /\.css(\?[^.]+)?$/.test(file)
