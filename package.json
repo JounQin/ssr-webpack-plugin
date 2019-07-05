@@ -57,7 +57,7 @@
     "@babel/preset-stage-0": "^7.0.0-beta.44",
     "eslint": "^4.19.1",
     "eslint-config-1stg": "^2.1.0",
-    "husky": "^0.14.3",
+    "husky": "^3.0.0",
     "lint-staged": "^7.0.4",
     "prettier": "^1.12.0"
   }
